@@ -29,7 +29,8 @@ class VoteIndex extends Component {
 
       const accounts = await web3.eth.getAccounts();
       await vote.methods.registerVote(true).send({
-        from: accounts[0]
+        from: accounts[0],
+        gas: '1000000'
       });
       Router.pushRoute('/results');
     } catch (err) {
