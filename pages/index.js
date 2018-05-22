@@ -27,10 +27,25 @@ class VoteIndex extends Component {
       this.setState({ loading: true, errorMessage: '' });
 
       const accounts = await web3.eth.getAccounts();
-      await vote.methods.registerVote(true).send({
+      await vote.methods.registerVote('true').send({
         from: accounts[0]
       });
-      Router.pushRoute(`/`);
+      Router.pushRoute('/results');
+    } catch (err) {
+      this.setState({ errorMessage: err.message });
+    }
+    this.setState({ loading: false });
+  };
+
+  onAgainst = async () => {
+    try {
+      this.setState({ loading: true, errorMessage: '' });
+
+      const accounts = await web3.eth.getAccounts();
+      await vote.methods.registerVote('false').send({
+        from: accounts[0]
+      });
+      Router.pushRoute('/results');
     } catch (err) {
       this.setState({ errorMessage: err.message });
     }
@@ -129,37 +144,55 @@ class VoteIndex extends Component {
 
 
   renderVote() {
-    if (this.state.loggedIn && this.state.ballot.voteTimestamp == 0) {
-      const { Row, Cell, Body } = Table;
+    const { summary } = this.props;
+    const started = summary[0];
+    const ended = summary[2];
+
+    if (started && !ended) {
+
+      if (this.state.loggedIn && this.state.ballot.voteTimestamp == 0) {
+        const { Row, Cell, Body } = Table;
+        return (
+          <div>
+            <h3>Vote To Become A Citizen!</h3>
+            <Table>
+              <Body>
+                <Row>
+                  <Cell><Button color="green" loading={this.state.loading} onClick={this.onFor}>For</Button></Cell>
+                  <Cell><Button color="red" loading={this.state.loading} onClick={this.onAgainst}>Against</Button></Cell>
+                </Row>
+              </Body>
+            </Table>
+          </div>
+        );
+      } else if (this.state.loggedIn && this.state.ballot.voteTimestamp > 0){
+        return (
+          <h3>Thanks for being a citizen!</h3>
+        );
+      } else {
+        return (
+          <h3>Only registered contributors can vote!</h3>
+        );
+      }
+
+    } else if ( started && ended ){
       return (
-        <div>
-          <h3>Vote To Become A Citizen!</h3>
-          <Table>
-            <Body>
-              <Row>
-                <Cell><Button primary color="green" loading={this.state.loading} onClick={this.onFor}>For</Button></Cell>
-                <Cell><Button primary color="red" loading={this.state.loading} onClick={this.onAgainst}>Against</Button></Cell>
-              </Row>
-            </Body>
-          </Table>
-        </div>
-      );
-    } else if (this.state.loggedIn && this.state.ballot.voteTimestamp > 0){
-      return (
-        <h3>Thanks for being a citizen!</h3>
-      );
+        <h3>This vote has ended!</h3>
+      )
     } else {
       return (
-        <h3>Only registered contributors can vote!</h3>
-      );
+        <h3>This vote has not started yet!</h3>
+      )
     }
   }
 
   render() {
-
     return (
       <Layout>
         <div>
+          <Link route={'/results'}>
+            <a>Results</a>
+          </Link>
           <h3>Ballot Summary</h3>
           <div>
             { this.renderSummary() }

@@ -50,13 +50,19 @@ class Results extends Component {
   renderRows() {
     const { Row, Cell, Body } = Table;
     const { ballots } = this.props;
-    
+
     return ballots.map((b, index) => {
+      let v = '';
+      if (b.voteTimestamp > 0 && b.vote) {
+        v = 'For';
+      } else if (b.voteTimestamp > 0 && !b.vote) {
+        v = 'Against';
+      }
           return (
               <Row>
                 <Cell>{b.contributor}</Cell>
                 <Cell>{b.land}</Cell>
-                <Cell>{b.vote}</Cell>
+                <Cell>{v}</Cell>
                 <Cell>{b.voteTimestamp}</Cell>
               </Row>
           );
@@ -90,6 +96,11 @@ class Results extends Component {
     return (
       <Layout>
         <div>
+          <Link route={'/'}>
+            <a>
+              Back
+            </a>
+          </Link>
           <h3>Ballot Summary</h3>
           <div>
             { this.renderSummary() }
