@@ -1,0 +1,5 @@
+node_modules
+ethereum/build
+infura.js
+config.js
+.next
