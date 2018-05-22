@@ -22,20 +22,39 @@ class VoteIndex extends Component {
     return { summary };
   }
 
+  onFor = async () => {
+    try {
+      this.setState({ loading: true, errorMessage: '' });
+
+      const accounts = await web3.eth.getAccounts();
+      await vote.methods.registerVote(true).send({
+        from: accounts[0]
+      });
+      Router.pushRoute(`/`);
+    } catch (err) {
+      this.setState({ errorMessage: err.message });
+    }
+    this.setState({ loading: false });
+  };
+
   onLogin = async event => {
     event.preventDefault();
 
     this.setState({ loading: true, errorMessage: '' });
 
     const accounts = await web3.eth.getAccounts();
-    if (accounts.length) {
-      const ballotId = await vote.methods.contributors(accounts[0]).call();
+    console.log(accounts);
+    if (accounts.length > 0) {
+      const address = accounts[0];
+
+      const ballotId = await vote.methods.contributors(address).call();
       let ballot = {};
-      if (ballotId) {
-        ballot = await vote.methods.ballots(ballotId -1);
+      if (ballotId > 0) {
+        ballot = await vote.methods.ballots(ballotId -1).call();
+        console.log(ballot);
       }
       this.setState({
-        address: accounts[0],
+        address: address,
         loggedIn: true,
         ballotId: ballotId,
         ballot: ballot,
@@ -66,13 +85,13 @@ class VoteIndex extends Component {
           <Row><Cell>forLandCount</Cell><Cell>{summary[7]}</Cell></Row>
           <Row><Cell>againstLandCount</Cell><Cell>{summary[8]}</Cell></Row>
           <Row><Cell>totalVoters</Cell><Cell>{summary[9]}</Cell></Row>
-          <Row><Cell>totalLan</Cell><Cell>{summary[10]}</Cell></Row>
+          <Row><Cell>totalLand</Cell><Cell>{summary[10]}</Cell></Row>
         </Body>
       </Table>
     );
   }
 
-  renderVote() {
+  renderYourSummary() {
     const { Row, Cell, Body } = Table;
 
     if (this.state.loggedIn) {
@@ -82,13 +101,18 @@ class VoteIndex extends Component {
         registered = "True";
       }
 
-      return <h1>Hi</h1>
+      let voted = "False";
+      if (this.state.ballot.voteTimestamp > 0) {
+        voted = "True";
+      }
+
       return (
         <Table>
         <Body>
           <Row><Cell>Your Address</Cell><Cell>{ this.state.address }</Cell></Row>
           <Row><Cell>Registered</Cell><Cell>{ registered }</Cell></Row>
           <Row><Cell>Ballot ID</Cell><Cell>{ this.state.ballotId }</Cell></Row>
+          <Row><Cell>Voted</Cell><Cell>{ voted }</Cell></Row>
         </Body>
         </Table>
       );
@@ -102,6 +126,35 @@ class VoteIndex extends Component {
     }
   }
 
+
+
+  renderVote() {
+    if (this.state.loggedIn && this.state.ballot.voteTimestamp == 0) {
+      const { Row, Cell, Body } = Table;
+      return (
+        <div>
+          <h3>Vote To Become A Citizen!</h3>
+          <Table>
+            <Body>
+              <Row>
+                <Cell><Button primary color="green" loading={this.state.loading} onClick={this.onFor}>For</Button></Cell>
+                <Cell><Button primary color="red" loading={this.state.loading} onClick={this.onAgainst}>Against</Button></Cell>
+              </Row>
+            </Body>
+          </Table>
+        </div>
+      );
+    } else if (this.state.loggedIn && this.state.ballot.voteTimestamp > 0){
+      return (
+        <h3>Thanks for being a citizen!</h3>
+      );
+    } else {
+      return (
+        <h3>Only registered contributors can vote!</h3>
+      );
+    }
+  }
+
   render() {
 
     return (
@@ -111,8 +164,9 @@ class VoteIndex extends Component {
           <div>
             { this.renderSummary() }
           </div>
-          <h3>Place Your Vote</h3>
+          <h3>Your Summary</h3>
           <div>
+            { this.renderYourSummary() }
             { this.renderVote() }
           </div>
         </div>
