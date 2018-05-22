@@ -3,7 +3,8 @@ import { Form, Table, Button, Message } from 'semantic-ui-react';
 import vote from '../ethereum/vote';
 import web3 from '../ethereum/web3';
 import Layout from '../components/Layout';
-import { Link } from '../routes';
+import Summary from '../components/Summary';
+import { Link, Router } from '../routes';
 
 class VoteIndex extends Component {
 
@@ -27,7 +28,7 @@ class VoteIndex extends Component {
       this.setState({ loading: true, errorMessage: '' });
 
       const accounts = await web3.eth.getAccounts();
-      await vote.methods.registerVote('true').send({
+      await vote.methods.registerVote(true).send({
         from: accounts[0]
       });
       Router.pushRoute('/results');
@@ -42,7 +43,7 @@ class VoteIndex extends Component {
       this.setState({ loading: true, errorMessage: '' });
 
       const accounts = await web3.eth.getAccounts();
-      await vote.methods.registerVote('false').send({
+      await vote.methods.registerVote(false).send({
         from: accounts[0]
       });
       Router.pushRoute('/results');
@@ -88,21 +89,7 @@ class VoteIndex extends Component {
     const ended = (summary[2] ? "True" : "False");
 
     return (
-      <Table>
-        <Body>
-          <Row><Cell>started</Cell><Cell>{started}</Cell></Row>
-          <Row><Cell>endTimestamp</Cell><Cell>{summary[1]}</Cell></Row>
-          <Row><Cell>ended</Cell><Cell>{ended}</Cell></Row>
-          <Row><Cell>voterCount</Cell><Cell>{summary[3]}</Cell></Row>
-          <Row><Cell>landCount</Cell><Cell>{summary[4]}</Cell></Row>
-          <Row><Cell>forVoteCount</Cell><Cell>{summary[5]}</Cell></Row>
-          <Row><Cell>againstVoteCount</Cell><Cell>{summary[6]}</Cell></Row>
-          <Row><Cell>forLandCount</Cell><Cell>{summary[7]}</Cell></Row>
-          <Row><Cell>againstLandCount</Cell><Cell>{summary[8]}</Cell></Row>
-          <Row><Cell>totalVoters</Cell><Cell>{summary[9]}</Cell></Row>
-          <Row><Cell>totalLand</Cell><Cell>{summary[10]}</Cell></Row>
-        </Body>
-      </Table>
+      <Summary summary={summary} />
     );
   }
 

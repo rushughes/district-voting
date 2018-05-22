@@ -3,6 +3,7 @@ import { Form, Table, Button, Message } from 'semantic-ui-react';
 import vote from '../ethereum/vote';
 import web3 from '../ethereum/web3';
 import Layout from '../components/Layout';
+import Summary from '../components/Summary';
 import { Link } from '../routes';
 
 class Results extends Component {
@@ -29,21 +30,7 @@ class Results extends Component {
     const ended = (summary[2] ? "True" : "False");
 
     return (
-      <Table>
-        <Body>
-          <Row><Cell>started</Cell><Cell>{started}</Cell></Row>
-          <Row><Cell>endTimestamp</Cell><Cell>{summary[1]}</Cell></Row>
-          <Row><Cell>ended</Cell><Cell>{ended}</Cell></Row>
-          <Row><Cell>voterCount</Cell><Cell>{summary[3]}</Cell></Row>
-          <Row><Cell>landCount</Cell><Cell>{summary[4]}</Cell></Row>
-          <Row><Cell>forVoteCount</Cell><Cell>{summary[5]}</Cell></Row>
-          <Row><Cell>againstVoteCount</Cell><Cell>{summary[6]}</Cell></Row>
-          <Row><Cell>forLandCount</Cell><Cell>{summary[7]}</Cell></Row>
-          <Row><Cell>againstLandCount</Cell><Cell>{summary[8]}</Cell></Row>
-          <Row><Cell>totalVoters</Cell><Cell>{summary[9]}</Cell></Row>
-          <Row><Cell>totalLand</Cell><Cell>{summary[10]}</Cell></Row>
-        </Body>
-      </Table>
+      <Summary summary={summary} />
     );
   }
 
@@ -53,11 +40,16 @@ class Results extends Component {
 
     return ballots.map((b, index) => {
       let v = '';
+      let t = '';
       if (b.voteTimestamp > 0 && b.vote) {
         v = 'For';
       } else if (b.voteTimestamp > 0 && !b.vote) {
         v = 'Against';
       }
+      if (b.voteTimestamp > 0) {
+
+      }
+
           return (
               <Row>
                 <Cell>{b.contributor}</Cell>
